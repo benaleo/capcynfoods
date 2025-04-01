@@ -12,6 +12,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   // get from authService
   final authService = AuthService();
+  bool _isPasswordHidden = true;
 
   // text controller
   final _emailController = TextEditingController();
@@ -50,8 +51,19 @@ class _LoginPageState extends State<LoginPage> {
           ),
           TextField(
             controller: _passwordController,
+            obscureText: _isPasswordHidden,
             decoration: InputDecoration(
               label: const Text('Password'),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordHidden = !_isPasswordHidden;
+                  });
+                },
+              ),
             ),
           ),
           SizedBox(
