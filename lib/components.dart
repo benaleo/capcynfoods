@@ -31,3 +31,32 @@ class TextPassword extends StatelessWidget {
     );
   }
 }
+
+class CustomDateTimeNow extends StatelessWidget {
+  const CustomDateTimeNow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final formattedDate = '${now.day} ${_getMonthName(now.month)} ${now.year}';
+    return Text(formattedDate);
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
+  }
+}

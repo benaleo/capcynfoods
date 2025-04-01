@@ -18,6 +18,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isConfirmPasswordHidden = true;
 
   // text controller
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -25,6 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
   // login button pressed function
   void signUp() async {
     // prepare data
+    final name = _nameController.text;
     final email = _emailController.text;
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
@@ -37,7 +39,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // attemps to register
     try {
-      await authService.signUpWithEmailAndPassword(email, password);
+      await authService.signUpWithEmailAndPassword(name, email, password);
       Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -55,6 +57,12 @@ class _RegisterPageState extends State<RegisterPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 30.0),
         children: [
+          TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              label: const Text('Name'),
+            ),
+          ),
           TextField(
             controller: _emailController,
             decoration: InputDecoration(
