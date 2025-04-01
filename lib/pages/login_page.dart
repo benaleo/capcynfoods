@@ -2,6 +2,8 @@ import 'package:capcynfoods/auth/auth_service.dart';
 import 'package:capcynfoods/pages/register_page.dart';
 import 'package:flutter/material.dart';
 
+import '../components.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -41,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         title: Center(child: const Text('Login')),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 3-.0),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 3 - .0),
         children: [
           TextField(
             controller: _emailController,
@@ -49,22 +51,15 @@ class _LoginPageState extends State<LoginPage> {
               label: const Text('Email'),
             ),
           ),
-          TextField(
+          TextPassword(
             controller: _passwordController,
-            obscureText: _isPasswordHidden,
-            decoration: InputDecoration(
-              label: const Text('Password'),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isPasswordHidden = !_isPasswordHidden;
-                  });
-                },
-              ),
-            ),
+            isPasswordHidden: _isPasswordHidden,
+            onPasswordTapped: () {
+              setState(() {
+                _isPasswordHidden = !_isPasswordHidden;
+              });
+            },
+            label: 'Password',
           ),
           SizedBox(
             height: 12.0,

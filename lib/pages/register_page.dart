@@ -1,3 +1,4 @@
+import 'package:capcynfoods/components.dart';
 import 'package:capcynfoods/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,8 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   // get from authService
   final authService = AuthService();
+  bool _isPasswordHidden = true;
+  bool _isConfirmPasswordHidden = true;
 
   // text controller
   final _emailController = TextEditingController();
@@ -58,17 +61,25 @@ class _RegisterPageState extends State<RegisterPage> {
               label: const Text('Email'),
             ),
           ),
-          TextField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              label: const Text('Password'),
-            ),
+          TextPassword(
+            controller : _passwordController,
+            isPasswordHidden: _isPasswordHidden,
+            onPasswordTapped: () {
+              setState(() {
+                _isPasswordHidden = !_isPasswordHidden;
+              });
+            },
+            label: 'Password',
           ),
-          TextField(
-            controller: _confirmPasswordController,
-            decoration: InputDecoration(
-              label: const Text('Confirm Password'),
-            ),
+          TextPassword(
+            controller : _confirmPasswordController,
+            isPasswordHidden: _isConfirmPasswordHidden,
+            onPasswordTapped: () {
+              setState(() {
+                _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
+              });
+            },
+            label: 'Confirm Password',
           ),
           SizedBox(height: 12.0),
           ElevatedButton(
