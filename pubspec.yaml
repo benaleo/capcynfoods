@@ -35,10 +35,26 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   supabase_flutter: ^2.8.4
+  intl: ^0.18.1
+  flutter_dotenv: ^5.2.1
+  excel: ^2.0.1 # untuk membuat file Excel
+  path_provider: ^2.1.1 # untuk mendapatkan direktori penyimpanan
+  open_file: ^3.3.1 # untuk membuka file setelah download
+  fluttertoast: ^8.2.2 # untuk menampilkan notifikasi (opsional)
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -58,6 +74,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - .env
+    - assets/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

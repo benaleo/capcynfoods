@@ -11,6 +11,9 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+.env
+upload-keystore.jks
+**/upload-keystore.jks
 
 # IntelliJ related
 *.iml

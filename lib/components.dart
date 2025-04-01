@@ -33,11 +33,12 @@ class TextPassword extends StatelessWidget {
 }
 
 class CustomDateTimeNow extends StatelessWidget {
-  const CustomDateTimeNow({super.key});
+  final DateTime? dateTime;
+  const CustomDateTimeNow({super.key, this.dateTime});
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
+    final now = dateTime ?? DateTime.now();
     final formattedDate = '${now.day} ${_getMonthName(now.month)} ${now.year}';
     return Text(formattedDate);
   }

@@ -38,4 +38,11 @@ class AuthService {
     final user = session?.user;
     return user?.userMetadata?['name'] as String?;
   }
+
+  // get user id
+  String? getCurrentUserId() {
+    final session = _supabase.auth.currentSession;
+    final user = session?.user;
+    return user?.id;
+  }
 }
