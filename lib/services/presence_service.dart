@@ -10,11 +10,7 @@ class PresenceService {
   Future<void> signIn() async {
     String dateNow = DateTime.now().toString().split(' ')[0];
     String userId = _authService.getCurrentUserId() ?? "";
-    final response = await _supabase
-        .from('presences')
-        .select()
-        .eq('date', dateNow)
-        .eq('user_id', userId);
+    final response = await _supabase.from('presences').select().eq('date', dateNow).eq('user_id', userId);
     int countDataToday = response.length;
     bool isDateNowAndUserReady = countDataToday == 0 || countDataToday == null;
     if (!isDateNowAndUserReady) {
@@ -50,10 +46,12 @@ class PresenceService {
   Future<Map<String, dynamic>> getHistoryToday() async {
     try {
       String userId = _authService.getCurrentUserId() ?? "";
+      String dateNow = DateTime.now().toString().split(' ')[0];
       final response = await _supabase
           .from('presences')
           .select('start, end')
           .eq('user_id', userId)
+          .eq('date', dateNow)
           .order('start', ascending: false)
           .limit(1)
           .single();
@@ -69,11 +67,7 @@ class PresenceService {
   Future<List<Map<String, dynamic>>> getListHistoryUser() async {
     try {
       String userId = _authService.getCurrentUserId() ?? "";
-      final response = await _supabase
-          .from('presences')
-          .select('start, end')
-          .eq('user_id', userId)
-          .order('created_at', ascending: false);
+      final response = await _supabase.from('presences').select('start, end').eq('user_id', userId).order('created_at', ascending: false);
 
       return response;
     } catch (e) {
@@ -81,5 +75,4 @@ class PresenceService {
       return [];
     }
   }
-
 }

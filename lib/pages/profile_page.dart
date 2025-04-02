@@ -26,7 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Center(child: const Text('Profile')),
         actions: [IconButton(onPressed: logout, icon: const Icon(Icons.logout))],
       ),
       drawer: Drawer(
@@ -189,8 +189,12 @@ class CardHistory extends StatefulWidget {
 
 class _CardHistoryState extends State<CardHistory> {
   final authService = AuthService();
-
   late final Stream<List<Map<String, dynamic>>> _historyStream;
+  int _currentPage = 0;
+  final int _itemsPerPage = 5;
+  List<Map<String, dynamic>> _allPresences = [];
+  bool _isLoadingMore = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -198,43 +202,107 @@ class _CardHistoryState extends State<CardHistory> {
     _historyStream = Supabase.instance.client
         .from('presences')
         .stream(primaryKey: ['id'])
-        .eq('user_id', authService.getCurrentUserId() ?? '');
+        .eq('user_id', authService.getCurrentUserId() ?? '')
+        .order('date', ascending: false);
+
+    _scrollController.addListener(_scrollListener);
   }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      _loadMore();
+    }
+  }
+
+  List<Map<String, dynamic>> get _visiblePresences {
+    final endIndex = (_currentPage + 1) * _itemsPerPage;
+    if (endIndex > _allPresences.length) {
+      return _allPresences;
+    }
+    return _allPresences.sublist(0, endIndex);
+  }
+
+  bool get _hasMoreItems {
+    return _visiblePresences.length < _allPresences.length;
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMoreItems) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    setState(() {
+      _currentPage++;
+      _isLoadingMore = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double fullWidth = MediaQuery.of(context).size.width;
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Riwayat Absensi',
-            style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-          ),
-          StreamBuilder(
-            stream: _historyStream,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              final presences = snapshot.data as List<Map<String, dynamic>>;
 
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: presences.length,
+    return StreamBuilder(
+      stream: _historyStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        _allPresences = snapshot.data as List<Map<String, dynamic>>;
+        final visiblePresences = _visiblePresences;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                'Riwayat Absensi',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.7, // Atur tinggi sesuai kebutuhan
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: visiblePresences.length + (_hasMoreItems ? 1 : 0),
                 itemBuilder: (context, index) {
-                  String startTime =
-                      presences[index]['start'] != null ? DateFormat('HH:mm').format(DateTime.parse(presences[index]['start'])) : '--:--';
-                  String endTime = presences[index]['end'] != null ? DateFormat('HH:mm').format(DateTime.parse(presences[index]['end'])) : '--:--';
-                  DateTime date = DateTime.parse(presences[index]['date']);
+                  if (index >= visiblePresences.length) {
+                    return Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  String startTime = visiblePresences[index]['start'] != null
+                      ? DateFormat('HH:mm').format(
+                      DateTime.parse(visiblePresences[index]['start']))
+                      : '--:--';
+                  String endTime = visiblePresences[index]['end'] != null
+                      ? DateFormat('HH:mm').format(
+                      DateTime.parse(visiblePresences[index]['end']))
+                      : '--:--';
+                  DateTime date =
+                  DateTime.parse(visiblePresences[index]['date']);
 
                   return Container(
                     width: fullWidth,
-                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
+                    margin: EdgeInsets.only(bottom: 10.0),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 20.0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
                       color: Color(0xFFedf4fc),
@@ -243,9 +311,8 @@ class _CardHistoryState extends State<CardHistory> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomDateTimeNow(
-                          dateTime: date,
-                        ),
+                        CustomDateTimeNow(dateTime: date),
+                        SizedBox(height: 10.0),
                         Row(
                           children: [
                             Expanded(
@@ -254,8 +321,13 @@ class _CardHistoryState extends State<CardHistory> {
                                   Icon(Icons.login, color: Color(0xFF8a4af3)),
                                   SizedBox(width: 10.0),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [Text('Mulai'), SizedBox(height: 10.0), Text(startTime)],
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Mulai'),
+                                      SizedBox(height: 10.0),
+                                      Text(startTime)
+                                    ],
                                   )
                                 ],
                               ),
@@ -266,8 +338,13 @@ class _CardHistoryState extends State<CardHistory> {
                                   Icon(Icons.logout, color: Colors.red),
                                   SizedBox(width: 10.0),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [Text('Selesai'), SizedBox(height: 10.0), Text(endTime)],
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Selesai'),
+                                      SizedBox(height: 10.0),
+                                      Text(endTime)
+                                    ],
                                   )
                                 ],
                               ),
@@ -278,11 +355,11 @@ class _CardHistoryState extends State<CardHistory> {
                     ),
                   );
                 },
-              );
-            },
-          ),
-        ],
-      ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
